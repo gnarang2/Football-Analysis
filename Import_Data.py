@@ -35,7 +35,6 @@ import matplotlib.pyplot as plt
 path = "C:/Users/nar29695/Documents/My created reports/"  #Insert path here
 database = path + 'database.sqlite'
 
-#https://www.kaggle.com/jiezi2004/soccer#possession_detail.csv ALL THE MISSING COLUMNS ARE HERE
 
 conn = sqlite3.connect(database)
 
