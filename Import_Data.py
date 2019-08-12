@@ -1,13 +1,15 @@
+#Install all the required libraries here.
 import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd 
 import seaborn as sns
-import pandas as pd
+import matplotlib.pyplot as plt
+import scipy.stats as stats
 import sqlite3
-import numpy as np
-from numpy import random
+from os import listdir
+from os.path import isfile, join
 
 #load data (make sure you have downloaded database.sqlite)
-with sqlite3.connect('C:/Users/nar29695/Documents/My created reports/database.sqlite') as con:
+with sqlite3.connect('D:/Football_MyProject/database.sqlite') as con:
     countries = pd.read_sql_query("SELECT * from Country", con)
     leagues = pd.read_sql_query("SELECT * from League", con)
     matches = pd.read_sql_query("SELECT * from Match", con)
@@ -17,15 +19,40 @@ with sqlite3.connect('C:/Users/nar29695/Documents/My created reports/database.sq
     teams = pd.read_sql_query("SELECT * from Team", con)
     team_attributes = pd.read_sql_query("SELECT * from Team_Attributes", con)
 
+    
+Transfers = []
+Results = []
+for i in range(9,17):
+    if(i==9):
+        start = '09'
+        end = '10'
+    else:
+        start = str(i)
+        end = str(i+1)
+    Season = []
+    League_List = ['english_premier_league', 'french_ligue_1','german_bundesliga_1','italian_serie_a','spanish_primera_division']
+    for league in League_List:
+        Season.append(pd.read_csv("D:/Football_MyProject/Transfers/20" + start + '-' + end + '/' + league+".csv"))
+    Transfers.append(Season)
+    Standings = []
+    League_List = ['Bundesliga', 'EPL','La_Liga','Ligue1','SerieA']
+    for league in League_List:
+        Standings.append(pd.read_csv("D:/Football_MyProject/Points_table/"+league+"_results/standings_"  + start + end + '_.csv'))
+    Results.append(Standings)
 
-print(matches['shoton'])
+
+Missing_Database_Values_Files = [f for f in listdir("D:/Football_MyProject/European Soccer") if isfile(join("D:/Football_MyProject/European Soccer", f))]
+Missing_Database_Values_Files.remove('DataDictionary.xlsx')
+Missing_Database_Values = []
+for item in Missing_Database_Values_Files:
+    Missing_Database_Values.append(pd.read_csv('D:/Football_MyProject/European Soccer/'+item))
+    
 
 
 
 
 
-
-#EASIER WAY TO MANIPULATE AND FIX DATA.
+'''#EASIER WAY TO MANIPULATE AND FIX DATA.
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import sqlite3
@@ -68,3 +95,4 @@ detailed_matches = pd.read_sql("""SELECT Match.id,
                                 LEFT JOIN Team AS AT on AT.team_api_id = Match.away_team_api_id
                                 ORDER by date;""", conn)
 print(detailed_matches)
+'''
