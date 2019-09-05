@@ -1,6 +1,6 @@
 #Install all the required libraries here.
 import numpy as np
-import pandas as pd 
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -9,7 +9,7 @@ from os import listdir
 from os.path import isfile, join
 
 #load data (make sure you have downloaded database.sqlite)
-with sqlite3.connect('D:/Football_MyProject/database.sqlite') as con:
+with sqlite3.connect('database.sqlite') as con:
     countries = pd.read_sql_query("SELECT * from Country", con)
     leagues = pd.read_sql_query("SELECT * from League", con)
     matches = pd.read_sql_query("SELECT * from Match", con)
@@ -19,7 +19,7 @@ with sqlite3.connect('D:/Football_MyProject/database.sqlite') as con:
     teams = pd.read_sql_query("SELECT * from Team", con)
     team_attributes = pd.read_sql_query("SELECT * from Team_Attributes", con)
 
-    
+
 Transfers = []
 Results = []
 for i in range(9,17):
@@ -32,21 +32,21 @@ for i in range(9,17):
     Season = []
     League_List = ['english_premier_league', 'french_ligue_1','german_bundesliga_1','italian_serie_a','spanish_primera_division']
     for league in League_List:
-        Season.append(pd.read_csv("D:/Football_MyProject/Transfers/20" + start + '-' + end + '/' + league+".csv"))
+        Season.append(pd.read_csv("data/20" + start + '-' + end + '/' + league+".csv"))
     Transfers.append(Season)
     Standings = []
     League_List = ['Bundesliga', 'EPL','La_Liga','Ligue1','SerieA']
     for league in League_List:
-        Standings.append(pd.read_csv("D:/Football_MyProject/Points_table/"+league+"_results/standings_"  + start + end + '_.csv'))
+        Standings.append(pd.read_csv("data/Points_table/"+league+"_results/standings_"  + start + end + '_.csv'))
     Results.append(Standings)
 
 
-Missing_Database_Values_Files = [f for f in listdir("D:/Football_MyProject/European Soccer") if isfile(join("D:/Football_MyProject/European Soccer", f))]
+Missing_Database_Values_Files = [f for f in listdir("data/European Soccer") if isfile(join("data/European Soccer", f))]
 Missing_Database_Values_Files.remove('DataDictionary.xlsx')
 Missing_Database_Values = []
 for item in Missing_Database_Values_Files:
-    Missing_Database_Values.append(pd.read_csv('D:/Football_MyProject/European Soccer/'+item))
-    
+    Missing_Database_Values.append(pd.read_csv('data/European Soccer/'+item))
+
 
 
 
@@ -74,20 +74,20 @@ countries = pd.read_sql("""SELECT *
 
 leagues = pd.read_sql("""SELECT *
                         FROM League
-                        JOIN Country ON Country.id = League.country_id;""", conn)                        
+                        JOIN Country ON Country.id = League.country_id;""", conn)
 teams = pd.read_sql("""SELECT *
                         FROM Team
                         ORDER BY team_long_name;""", conn)
-detailed_matches = pd.read_sql("""SELECT Match.id, 
-                                        Country.name AS country_name, 
-                                        League.name AS league_name, 
-                                        season, 
-                                        stage, 
+detailed_matches = pd.read_sql("""SELECT Match.id,
+                                        Country.name AS country_name,
+                                        League.name AS league_name,
+                                        season,
+                                        stage,
                                         date,
                                         HT.team_long_name AS  home_team,
                                         AT.team_long_name AS away_team,
-                                        home_team_goal, 
-                                        away_team_goal                                        
+                                        home_team_goal,
+                                        away_team_goal
                                 FROM Match
                                 JOIN Country on Country.id = Match.country_id
                                 JOIN League on League.id = Match.league_id

@@ -6,7 +6,7 @@
 
 #Install all the required libraries here.
 import numpy as np
-import pandas as pd 
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -15,7 +15,7 @@ from os import listdir
 from os.path import isfile, join
 
 #load data (make sure you have downloaded database.sqlite)
-with sqlite3.connect('D:/Football_MyProject/database.sqlite') as con:
+with sqlite3.connect('database.sqlite') as con:
     countries = pd.read_sql_query("SELECT * from Country", con)
     leagues = pd.read_sql_query("SELECT * from League", con)
     matches = pd.read_sql_query("SELECT * from Match", con)
@@ -25,7 +25,7 @@ with sqlite3.connect('D:/Football_MyProject/database.sqlite') as con:
     teams = pd.read_sql_query("SELECT * from Team", con)
     team_attributes = pd.read_sql_query("SELECT * from Team_Attributes", con)
 
-    
+
 Transfers = []
 Results = []
 for i in range(9,17):
@@ -38,30 +38,30 @@ for i in range(9,17):
     Season = []
     League_List = ['english_premier_league', 'french_ligue_1','german_bundesliga_1','italian_serie_a','spanish_primera_division']
     for league in League_List:
-        x = pd.read_csv("D:/Football_MyProject/Transfers/20" + start + '-' + end + '/' + league+".csv")
+        x = pd.read_csv("data/20" + start + '-' + end + '/' + league+".csv")
         Season.append(x)
     Transfers.append(Season)
     Standings = []
     League_List = ['Bundesliga', 'EPL','La_Liga','Ligue1','SerieA']
     for league in League_List:
-        x = pd.read_csv("D:/Football_MyProject/Points_table/"+league+"_results/standings_"  + start + end + '_.csv')
+        x = pd.read_csv("data/Points_table/"+league+"_results/standings_"  + start + end + '_.csv')
         name = "Standings " + league + " " + start + " "+ end
         x = x.rename(columns={'Unnamed: 0':name})
         Standings.append(x)
     Results.append(Standings)
 
 
-Missing_Database_Values_Files = [f for f in listdir("D:/Football_MyProject/European Soccer") if isfile(join("D:/Football_MyProject/European Soccer", f))]
+Missing_Database_Values_Files = [f for f in listdir("data/European Soccer") if isfile(join("data/European Soccer", f))]
 Missing_Database_Values_Files.remove('DataDictionary.xlsx')
 Missing_Database_Values = []
 for item in Missing_Database_Values_Files:
-    Missing_Database_Values.append(pd.read_csv('D:/Football_MyProject/European Soccer/'+item))
-    
-    
-    
+    Missing_Database_Values.append(pd.read_csv('data/European Soccer/'+item))
 
-    
-    
+
+
+
+
+
 #Create Dictionaries
 teams_dictionary = teams[['team_api_id','team_long_name']].copy()
 teams_dictionary = teams_dictionary.set_index('team_api_id')
@@ -95,7 +95,7 @@ countries_dictionary = countries_dictionary[['id','countries_name']]
 countries_dictionary = countries_dictionary.set_index('id')
 countries_dictionary = countries_dictionary.to_dict('series')
 
-positions_dictionary = Missing_Database_Values[5].copy()
+positions_dictionary = Missing_Database_Values[7].copy()
 positions_dictionary = positions_dictionary[['player_pos_x','player_pos_y','role_xy']]
 positions_dictionary = positions_dictionary.astype(str)
 positions_dictionary['pos'] = positions_dictionary['player_pos_x']+positions_dictionary['player_pos_y']
@@ -106,10 +106,10 @@ positions_dictionary = positions_dictionary.to_dict('series')
 
 
 #Create Dictionary for having Goals, basically combining all information together. Check Data_Dictionary in European Soccer for more information
-Goals = Missing_Database_Values[4][['id','match_id', 'team', 'elapsed','elapsed_plus','player1','player2','goal_type','subtype']].copy().fillna(0)
-Goals[['id','match_id','team','elapsed','elapsed_plus','player1','player2']] = Goals[['id','match_id','team','elapsed','elapsed_plus','player1','player2']].astype(int)
+Goals = Missing_Database_Values[4][['id','match_id', 'team', 'elapsed','elapsed_plus','player1','goal_type','subtype']].copy().fillna(0)
+Goals[['id','match_id','team','elapsed','elapsed_plus','player1']] = Goals[['id','match_id','team','elapsed','elapsed_plus','player1']].astype(int)
 Goals['match_id'] = Goals['match_id'].astype(str)
-Goals['Combined_Goals'] = list(zip(Goals.team,Goals.elapsed, Goals.elapsed_plus,Goals.player1,Goals.player2,Goals.goal_type,Goals.subtype))
+Goals['Combined_Goals'] = list(zip(Goals.team,Goals.elapsed, Goals.elapsed_plus,Goals.player1,Goals.goal_type,Goals.subtype))
 goals_dictionary = Goals[['id','Combined_Goals']].copy()
 goals_dictionary = goals_dictionary.rename(columns={'Combined_Goals':'goals'})
 goals_dictionary = goals_dictionary.set_index('id')
@@ -174,7 +174,9 @@ matches['goal'] = matches['id'].apply(lambda x: get_name(x,'goals_id'))
 goals_expand = matches['goal'].copy()
 goals_expand = pd.DataFrame(goals_expand)
 goals_expand = goals_expand.reset_index()
-goals_expand = pd.DataFrame(goals_expand['goal'].tolist(), columns=['Goal1','Goal2','Goal3','Goal4','Goal5','Goal6','Goal7','Goal8','Goal9','Goal10','Goal11','Goal12'])
+
+# print(goals_expand['goal'].tolist())
+goals_expand = pd.DataFrame(goals_expand['goal'].tolist())
 goals_expand['match_id'] = matches.index.copy()
 
 #Joining goals_expand into match['goal']
@@ -235,44 +237,44 @@ goals_dictionary
 #Create dictionaries for every fkn thing along with relevant function
 
 
-# Season Analysis: Do for each league separately and then combined too. 
+# Season Analysis: Do for each league separately and then combined too.
 # 1. Get column for last five and last three and last game(s) results for both home and away team
 # 2. Home team winning at what stages of the season
 # 3. Impact on goals scored / points / position based on transfers in / out as well as transfer money spent
 # 4. Shots on / off target accuracy including whether the led to the goal
 # 5. Goal types - penalty....
 # 6. Fouls commited / Cards leading to anything on goals/points/victory
-# 7. Do crosses / corners  impact goals scored 
+# 7. Do crosses / corners  impact goals scored
 # 8. Go into possession stats checking what grouping of possession 10-20,20-30,90-100 led to maximum victories
 # Basically we need to answer what leads to more goals and more points.
-# 9. how many times team scoring first won? Both home and away separately. 
+# 9. how many times team scoring first won? Both home and away separately.
 # 10. how does position impact a player from scoring.
-# 11. 
+# 11.
 
 # Overall Analysis:
 # 1. Position in league based on previous league position
 # 2. Home team winnin at what stages of the season
 # 3. Impact on goals scored / points / position based on transfers in / out as well as transfer money spent
-# 4. 
+# 4.
 
 # TO DO:
-# 
+#
 # First Data Analysis Technique we will use is regression:
 # 1. Ridge Regression
 # 2. Stepwise Regression
-# 
+#
 # Potential Target Variables for Regression: Goals scored by a team in a match, Points / Wins of a team in a season
-# 
-# Variables for Goals scored by a team in a match: 
+#
+# Variables for Goals scored by a team in a match:
 # 1. General Level: Results from last 1/3/5 games, Home / Away, Posession, Cards, Shots, Fouls, Crosses, Corners, Current position of the team and the opponent in the league before the match, stage of the season
-# 2. Deeper Level: Number of top level goal scorers from the last season, goals scored in previous 1/3/5 matches, scorer(s) from previous game in line up, how early the team's first goal was, goals to games ratio so far, did they score the first goal, number of forwards in the team, number of midfielders in the team, number of defenders in the team, 
+# 2. Deeper Level: Number of top level goal scorers from the last season, goals scored in previous 1/3/5 matches, scorer(s) from previous game in line up, how early the team's first goal was, goals to games ratio so far, did they score the first goal, number of forwards in the team, number of midfielders in the team, number of defenders in the team,
 
 # In[502]:
 
 
-Regression_Data = matches[['id', 'country_id', 'league_id', 'season', 'stage', 'date', 'match_api_id','home_team_api_id', 
+Regression_Data = matches[['id', 'country_id', 'league_id', 'season', 'stage', 'date', 'match_api_id','home_team_api_id',
  'away_team_api_id']].copy()
-Regression_Data = Regression_Data.melt(id_vars=['id', 'country_id', 'league_id', 'season', 'stage', 'date', 'match_api_id'], 
+Regression_Data = Regression_Data.melt(id_vars=['id', 'country_id', 'league_id', 'season', 'stage', 'date', 'match_api_id'],
         var_name="Home_or_Away", value_name="Team_id")
 #df.loc[(df['Club']==League),'League'] = 'Bundesliga'
 Regression_Data.loc[(Regression_Data['Home_or_Away']=='home_team_api_id'),'Home_or_Away'] = 'Home'
@@ -293,12 +295,12 @@ def points(x):
         if (x["home_team_goal"] < x["away_team_goal"]):
             return 3
     return 1
-Regression_Data = pd.merge(Regression_Data, matches[['id','home_team_goal', 'away_team_goal', 'home_player_X1', 'home_player_X2', 
- 'home_player_X3', 'home_player_X4', 'home_player_X5', 'home_player_X6', 'home_player_X7', 
+Regression_Data = pd.merge(Regression_Data, matches[['id','home_team_goal', 'away_team_goal', 'home_player_X1', 'home_player_X2',
+ 'home_player_X3', 'home_player_X4', 'home_player_X5', 'home_player_X6', 'home_player_X7',
  'home_player_X8', 'home_player_X9', 'home_player_X10', 'home_player_X11', 'away_player_X1',
  'away_player_X2', 'away_player_X3', 'away_player_X4', 'away_player_X5', 'away_player_X6',
  'away_player_X7', 'away_player_X8', 'away_player_X9', 'away_player_X10', 'away_player_X11',
- 'home_player_1', 'home_player_2', 'home_player_3', 'home_player_4', 'home_player_5', 'home_player_6', 
+ 'home_player_1', 'home_player_2', 'home_player_3', 'home_player_4', 'home_player_5', 'home_player_6',
  'home_player_7', 'home_player_8', 'home_player_9', 'home_player_10', 'home_player_11', 'away_player_1',
  'away_player_2', 'away_player_3', 'away_player_4', 'away_player_5', 'away_player_6', 'away_player_7',
  'away_player_8', 'away_player_9', 'away_player_10', 'away_player_11', 'goal', 'shoton', 'shotoff',
@@ -329,8 +331,8 @@ for key, item in m:
     Last_Result[key] = item['Points Gained'].shift(1)
     Last_Three_Results[key] = Last_Result[key]+item['Points Gained'].shift(2)+item['Points Gained'].shift(3)
     Last_Five_Results[key] = Last_Three_Results[key]+item['Points Gained'].shift(4)+item['Points Gained'].shift(5)
-    
-    
+
+
 Regression_Data = Regression_Data.reset_index()
 Regression_Data['Last_Five_Results'] = Regression_Data.apply(lambda x: results(x,5),axis=1)
 Regression_Data['Last_Three_Results'] = Regression_Data.apply(lambda x: results(x,3),axis=1)
@@ -350,7 +352,7 @@ for key, item in m:
     item['Rank'] = item['Total_Points'].rank(ascending = 0,method='first')
     item = item.sort_values(by="Rank")
     Position[key] = item
-    
+
 def pos(x,team):
     item = Position[(x['season'],x['stage'],x['league_id'])]
     if(team=="Own"):
@@ -402,4 +404,3 @@ for i in d.columns:
 
 
 d
-
