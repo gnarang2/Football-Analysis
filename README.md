@@ -4,11 +4,13 @@
 
 **Install Git lfs for managing large files**
 <br> Use the following command in order if running on Ubuntu/Debian
-'''
+<br> 
+
+```
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 sudo apt-get install git-lfs
 git lfs install
-'''
+```
 
 <br> After that, look at the following link to add files to *lfs*
 <br> [GitLfs Support](https://git-lfs.github.com/)
