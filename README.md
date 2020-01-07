@@ -1,4 +1,4 @@
-*Football-Analysis Predictor based on passed matches/fixtures*
+* Football-Analysis Predictor based on passed matches/fixtures*
 
 # GitHub
 
